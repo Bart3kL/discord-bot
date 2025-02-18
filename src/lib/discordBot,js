@@ -44,6 +44,11 @@ client.once('ready', () => {
 			);
 		}
 	});
+
+	// Dla testów – wysyłanie wiadomości co 1 minutę
+	schedule.scheduleJob('* * * * *', () => {
+		sendNotification('Test: wiadomość wysyłana co minutę.');
+	});
 });
 
 // Logowanie bota
