@@ -1,0 +1,53 @@
+import { Client, Intents } from 'discord.js';
+import schedule from 'node-schedule';
+
+// Podaj swój token bota i ID kanału
+const TOKEN = '1341348297754808373'; // <- zamień na swój token
+const CHANNEL_ID = '1330848174205567074'; // <- zamień na ID kanału
+
+const client = new Client({
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+});
+
+function sendNotification(message) {
+	const channel = client.channels.cache.get(CHANNEL_ID);
+	if (channel) {
+		channel.send(message).catch(console.error);
+	} else {
+		console.error('Nie znaleziono kanału o podanym ID:', CHANNEL_ID);
+	}
+}
+
+// Po zalogowaniu ustawiamy harmonogramy
+client.once('ready', () => {
+	console.log(`Zalogowano jako: ${client.user.tag}`);
+
+	// Harmonogram dla 15 dnia miesiąca o 20:00
+	// Wyrażenie cron: minuta 0, godzina 20, 15 dzień każdego miesiąca
+	schedule.scheduleJob('0 20 15 * *', () => {
+		sendNotification(
+			'Powiadomienie: Nabito godziny na projekty – 15 dzień miesiąca!'
+		);
+	});
+
+	// Harmonogram codzienny o 20:00 – sprawdzamy, czy dziś jest ostatni dzień miesiąca
+	schedule.scheduleJob('0 20 * * *', () => {
+		const now = new Date();
+		const lastDay = new Date(
+			now.getFullYear(),
+			now.getMonth() + 1,
+			0
+		).getDate();
+		if (now.getDate() === lastDay) {
+			sendNotification(
+				'Powiadomienie: Nabito godziny na projekty – ostatni dzień miesiąca!'
+			);
+		}
+	});
+});
+
+// Logowanie bota
+client.login(TOKEN).catch(console.error);
+
+// Eksportujemy klienta, aby plik został wykonany przy imporcie
+export default client;
